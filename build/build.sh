@@ -41,9 +41,11 @@ if [ ! -f "${PROJECT_ROOT}/CMakeLists.txt" ]; then
     exit 1
 fi
 
+mkdir -p "${BUILD_DIR}" "${OUTPUT_DIR}"
+cd "${BUILD_DIR}"
+
 cmake_args=(
-    -S "${PROJECT_ROOT}"
-    -B "${BUILD_DIR}"
+    "${PROJECT_ROOT}"
     -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
     -DCMAKE_INSTALL_PREFIX="${OUTPUT_DIR}"
 )
@@ -59,8 +61,6 @@ else
     echo -e "${YELLOW}Using host compiler${NC}"
 fi
 
-mkdir -p "${BUILD_DIR}" "${OUTPUT_DIR}"
-
 echo -e "${YELLOW}=== CMake configure: type=${BUILD_TYPE} ===${NC}"
 echo "Source: ${PROJECT_ROOT}"
 echo "Build:  ${BUILD_DIR}"
@@ -68,10 +68,10 @@ echo "Output: ${OUTPUT_DIR}"
 cmake "${cmake_args[@]}"
 
 echo -e "${YELLOW}=== Building common-logger ===${NC}"
-cmake --build "${BUILD_DIR}" -- -j"$(nproc)"
+cmake --build . -- -j"$(nproc)"
 
 echo -e "${YELLOW}=== Installing to output ===${NC}"
-cmake --install "${BUILD_DIR}"
+cmake --build . --target install
 
 echo -e "${GREEN}=== Build succeeded ===${NC}"
 echo "Include: ${OUTPUT_DIR}/include"
