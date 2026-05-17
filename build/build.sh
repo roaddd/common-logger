@@ -14,7 +14,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 PROJECT_ROOT=$(cd "${SCRIPT_DIR}/.." && pwd)
 BUILD_DIR=${SCRIPT_DIR}/output
 OUTPUT_DIR=${PROJECT_ROOT}/output
@@ -32,6 +32,12 @@ fi
 
 if [ "${BUILD_TYPE}" != "Debug" ] && [ "${BUILD_TYPE}" != "Release" ]; then
     echo -e "${RED}BUILD_TYPE must be Debug or Release${NC}"
+    exit 1
+fi
+
+if [ ! -f "${PROJECT_ROOT}/CMakeLists.txt" ]; then
+    echo -e "${RED}CMakeLists.txt not found in project root: ${PROJECT_ROOT}${NC}"
+    echo -e "${RED}Please run this script from common-logger/build, or check the script location.${NC}"
     exit 1
 fi
 
@@ -56,6 +62,9 @@ fi
 mkdir -p "${BUILD_DIR}" "${OUTPUT_DIR}"
 
 echo -e "${YELLOW}=== CMake configure: type=${BUILD_TYPE} ===${NC}"
+echo "Source: ${PROJECT_ROOT}"
+echo "Build:  ${BUILD_DIR}"
+echo "Output: ${OUTPUT_DIR}"
 cmake "${cmake_args[@]}"
 
 echo -e "${YELLOW}=== Building common-logger ===${NC}"
