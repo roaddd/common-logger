@@ -1,9 +1,9 @@
 #!/bin/bash
 # common-logger/build/build.sh
 # Usage:
-#   ./build.sh Release
-#   ./build.sh Debug
-#   ./build.sh Release ON
+#   ./build.sh Release          # default: RK3568 cross build
+#   ./build.sh Debug            # default: RK3568 cross build
+#   ./build.sh Release OFF      # host build
 #   ./build.sh Release ON /path/to/toolchain.cmake
 #   ./build.sh clean
 
@@ -20,7 +20,7 @@ BUILD_DIR=${SCRIPT_DIR}/output
 OUTPUT_DIR=${PROJECT_ROOT}/output
 
 BUILD_TYPE=${1:-"Release"}
-CROSS_COMPILE=${2:-"OFF"}
+CROSS_COMPILE=${2:-"ON"}
 TOOLCHAIN_FILE=${3:-"${SCRIPT_DIR}/rk3568.cmake"}
 
 if [ "${BUILD_TYPE}" = "clean" ]; then
@@ -66,6 +66,12 @@ echo "Source: ${PROJECT_ROOT}"
 echo "Build:  ${BUILD_DIR}"
 echo "Output: ${OUTPUT_DIR}"
 cmake "${cmake_args[@]}"
+
+echo -e "${YELLOW}=== Toolchain info ===${NC}"
+echo "C compiler:   $(grep '^CMAKE_C_COMPILER:FILEPATH=' CMakeCache.txt | cut -d= -f2-)"
+echo "CXX compiler: $(grep '^CMAKE_CXX_COMPILER:FILEPATH=' CMakeCache.txt | cut -d= -f2-)"
+echo "Sysroot:      $(grep '^CMAKE_SYSROOT:PATH=' CMakeCache.txt | cut -d= -f2-)"
+echo "System:       $(grep '^CMAKE_SYSTEM_NAME:INTERNAL=' CMakeCache.txt | cut -d= -f2-)"
 
 echo -e "${YELLOW}=== Building common-logger ===${NC}"
 cmake --build . -- -j"$(nproc)"
