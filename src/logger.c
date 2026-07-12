@@ -168,14 +168,16 @@ static void log_format_time(char *buf, size_t buf_size) {
              tv.tv_usec / 1000);
 }
 
-void log_write(LogLevel level, const char *file, int line, const char *fmt, ...) {
+void log_write(LogLevel level, const char *file, const char *func, int line, const char *fmt, ...) {
     char time_buf[32];
     FILE *out;
     int enable_color;
     va_list args;
+    const char *func_name;
 
     if (!fmt) return;
     if (level < log_get_level()) return;
+    func_name = (func && func[0] != '\0') ? func : "unknown";
     log_format_time(time_buf, sizeof(time_buf));
 
     pthread_mutex_lock(&g_log_lock);
@@ -183,18 +185,20 @@ void log_write(LogLevel level, const char *file, int line, const char *fmt, ...)
     enable_color = (out == stdout || out == stderr) && isatty(fileno(out));
     if (enable_color) {
         fprintf(out,
-                "%s[%s] [%s] [%s:%d] ",
+                "%s[%s] [%s] [%s:%s:%d] ",
                 log_level_color(level),
                 time_buf,
                 log_level_name(level),
                 log_basename(file),
+                func_name,
                 line);
     } else {
         fprintf(out,
-                "[%s] [%s] [%s:%d] ",
+                "[%s] [%s] [%s:%s:%d] ",
                 time_buf,
                 log_level_name(level),
                 log_basename(file),
+                func_name,
                 line);
     }
 
